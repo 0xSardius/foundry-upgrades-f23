@@ -13,9 +13,27 @@ contract DeployAndUpgradeTest is Test {
     UpgradeBox public upgrader;
     address public OWNER = makeAddr("owner");
 
-    BoxV1 public boxV1;
+    address public proxy;
 
     function setUp() public {
+        deployer = new DeployBox();
+        upgrader = new UpgradeBox();
+        proxy = BoxV1(deployer.run());
+    }
 
+    function testProxyStartsAsBoxV1() public {
+        vm.expectRevert();
+        
+    }
+
+    function testUpgrades() public {
+        BoxV2 box2 = new BoxV2();
+
+        address proxy = upgrader.upgradeBox(proxy, address(box2));
+
+        uint256 expectedValue = 2;
+        assertEq(expectedValue, BoxV2(proxy).version());
+        BoxV2(proxy).setNumber(7);
+        assertEq(7, BoxV2(proxy).getNumber());
     }
 }
